@@ -23,6 +23,7 @@ from HParam import HParam
 from matplotlib import mlab
 import numpy as np
 import scipy.signal as sp
+import shutil as sh
 
 
 def crossCalib(monitor_trace, response_trace, **kwargs):
@@ -87,9 +88,12 @@ if __name__=='__main__':
 	t0=UTCDateTime("2015-11-11T00:00:00")
 	duration=4*3600
 	t1=t0+duration
-	st=Stream()
-	st.append(client.getWaveform('FR','STR','00','BHZ',t0,t1)[0])
-	st.append(client.getWaveform('XX','GPIL','00','BHZ',t0,t1)[0])
-	(H,C,f)=crossCalib(st[0],st[1],demean=False,taper=False)
-	(per,dam,amp)=HParam(H,C,f,plotting=True)
-	print(per,dam,amp*1.0/419430)
+	st_mon=client.getWaveform('FR','STR','00','BH?',t0,t1)
+	st_mon.sort()
+	st_res=client.getWaveform('XX','GPIL','00','BH?',t0,t1)
+	st_res.sort()
+	for i in range(3):
+		(H,C,f)=crossCalib(st_mon[i],st_res[i],demean=True,taper=True)
+		(per,dam,amp)=HParam(H,C,f,plotting=True)
+		print(st_res[i].id+" per: "+str(per)+"; damp: "+str(dam)+"; gain: "+str(amp*1.0/419430))
+		sh.move("HParam_output.png",st_res[i].id+".png")
