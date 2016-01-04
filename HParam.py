@@ -65,6 +65,7 @@ def HParam(H, C, f, **kwargs):
 		_ax2.set_ylabel("Phase (deg)")
 		_ax2.set_xlabel("Frequence (Hz)")
 		_ax3.semilogx(f, C, 'r-')
+		_ax3.set_xlim([f[imin], np.amax(f)])
 		_ax3.grid()
 		_ax3.set_ylabel("Coherence")
 		_ax3.set_xlabel("Frequence (Hz)")

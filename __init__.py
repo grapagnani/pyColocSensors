@@ -2,5 +2,5 @@
 
 from crossCalib import crossCalib
 from transMatrix import transMatrix
-from Hparam import Hparam
+from HParam import HParam
 from _model import modelPhase,modelAmp
