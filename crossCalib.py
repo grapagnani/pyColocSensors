@@ -55,16 +55,16 @@ def crossCalib(monitor_trace, response_trace, **kwargs):
 	else:
 		n_overlap=int(n_fft*0.90)
 
-	#paz par défaut: STR station de référence
+	#paz par défaut: chaine générique
 	if 'paz' in kwargs:
 		paz=kwargs['paz']
 	else:
 		paz=dict()
-		paz['zeros']=np.array([0,0,-1.515e1,-3.186e2+4.012e2j,-3.186e2-4.012e2j])
-		paz['poles']=np.array([-3.7e-2-3.7e-2j,-3.7e-2+3.7e-2j,-1.599e1,-4.171e2,-1.009e2+4.019e2j,-1.009e2-4.019e2j,-7.454e3-7.142e3j,-7.454e3+7.142e3j,-1.87239e2])
-		paz['gain']=np.absolute(np.prod(2j*np.pi-paz['poles'])/np.prod(2j*np.pi-paz['zeros']))
-		paz['seismometer_gain']=1500
-		paz['datalogger_gain']=1677721
+		paz['zeros']=np.array([])
+		paz['poles']=np.array([])
+		paz['gain']=1
+		paz['seismometer_gain']=1
+		paz['datalogger_gain']=1
 		paz['sensitivity']=paz['seismometer_gain']*paz['datalogger_gain']*paz['gain']
 
 	
