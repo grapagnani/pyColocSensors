@@ -43,12 +43,12 @@ def crossCalib(monitor_trace, response_trace, **kwargs):
 	if 'nfft' in kwargs:
 		n_fft=kwargs['nfft']
 	else:
-		n_fft=8192
+		n_fft=1024
 
 	if 'npad' in kwargs:
 		n_pad=kwargs['npad']
 	else:
-		n_pad=32768
+		n_pad=n_fft*4
 
 	if 'noverlap' in kwargs:
 		n_overlap=kwargs['noverlap']
