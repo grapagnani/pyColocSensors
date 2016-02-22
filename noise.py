@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from obspy.core import UTCDateTime
-from obspy.arclink import Client
+from obspy.clients.arclink import Client
 import numpy as np
 from matplotlib import mlab
 from matplotlib import pyplot
@@ -46,13 +46,12 @@ def sleeman(stream, **kwargs):
 
 if __name__=='__main__':
 		
-	client=Client(host='gavrinis.u-strasbg.fr',port=18001,user='mbesdeberc@unistra.fr')
 	t1=UTCDateTime("2016-01-29T06:57:00") #bruit blanc injecté dans 3 ADCs
 	duration=10*60
 
-	data=Client(host='gavrinis',port=18001,user='mbesdeberc@unistra.fr')	#ouvre un client Arclink
+	data=Client(host='10.0.0.15',port=18001,user='mbesdeberc@unistra.fr')	#ouvre un client Arclink
 		
-	res=data.getWaveform('XX','GP000','00','CH?',t1,t1+duration,route=False)
+	res=data.get_waveforms('XX','GP000','00','CH?',t1,t1+duration,route=False)
 	res.sort()
 	res.write('res.mseed',format='MSEED')
 	for tr in res:

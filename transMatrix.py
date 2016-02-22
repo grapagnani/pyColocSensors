@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from obspy.core import UTCDateTime
-from obspy.arclink import Client
+from obspy.clients.arclink import Client
 import numpy as np
 
 def transMatrix(res_stream, mon_stream):
@@ -28,15 +28,15 @@ def transMatrix(res_stream, mon_stream):
 	return matrix
 
 if __name__=='__main__':	
-	client=Client(host='gavrinis.u-strasbg.fr',port=18001,user='mbesdeberc@unistra.fr')
+	client=Client(host='10.0.0.15',port=18001,user='mbesdeberc@unistra.fr')
 	t0=UTCDateTime("2015-11-11T00:00:00")
 	duration=4*3600
 	t1=t0+duration
-	st_ref=client.getWaveform('FR','STR','00','BH?',t0,t1)
+	st_ref=client.get_waveforms('FR','STR','00','BH?',t0,t1,route=False)
 	st_ref.sort()
 	for t in st_ref:
 		t.data=t.data*40.0/(2**26*1500)
-	st_test=client.getWaveform('XX','GPIL','00','BH?',t0,t1)
+	st_test=client.get_waveforms('XX','GPIL','00','BH?',t0,t1,route=False)
 	st_test.sort()
 	for t in st_test:
 		t.data=t.data*1./(419430)

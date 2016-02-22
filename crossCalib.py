@@ -18,7 +18,7 @@ Maxime Bès de Berc
 """
 
 from obspy.core import UTCDateTime,Stream
-from obspy.arclink import Client
+from obspy.clients.arclink import Client
 from HParam import HParam
 from matplotlib import mlab
 import numpy as np
@@ -88,9 +88,9 @@ if __name__=='__main__':
 	t0=UTCDateTime("2015-11-11T00:00:00")
 	duration=4*3600
 	t1=t0+duration
-	st_mon=client.getWaveform('FR','STR','00','BH?',t0,t1)
+	st_mon=client.get_waveforms('FR','STR','00','BH?',t0,t1,route=False)
 	st_mon.sort()
-	st_res=client.getWaveform('XX','GPIL','00','BH?',t0,t1)
+	st_res=client.get_waveforms('XX','GPIL','00','BH?',t0,t1,route=False)
 	st_res.sort()
 	for i in range(3):
 		(H,C,f)=crossCalib(st_mon[i],st_res[i],demean=True,taper=True)
