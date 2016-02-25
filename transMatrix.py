@@ -29,14 +29,13 @@ def transMatrix(res_stream, mon_stream):
 
 if __name__=='__main__':	
 	client=Client(host='10.0.0.15',port=18001,user='mbesdeberc@unistra.fr')
-	t0=UTCDateTime("2015-11-11T00:00:00")
-	duration=4*3600
-	t1=t0+duration
-	st_ref=client.get_waveforms('FR','STR','00','BH?',t0,t1,route=False)
+	t1=UTCDateTime("2016-02-25T14:00:00")
+	t2=t1+10*60
+	st_ref=client.get_waveforms('FR','STR','00','HH?',t1,t2,route=False)
 	st_ref.sort()
 	for t in st_ref:
-		t.data=t.data*40.0/(2**26*1500)
-	st_test=client.get_waveforms('XX','GPIL','00','BH?',t0,t1,route=False)
+		t.data=t.data*1.0/(1677721*1201)
+	st_test=client.get_waveforms('XX','GP000','00','HH?',t1,t2,route=False)
 	st_test.sort()
 	for t in st_test:
 		t.data=t.data*1./(419430)

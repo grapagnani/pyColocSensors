@@ -45,31 +45,20 @@ def sleeman(stream, **kwargs):
 	return (N0,N1,N2,f)
 
 if __name__=='__main__':
-		
-	t1=UTCDateTime("2016-01-29T06:57:00") #bruit blanc injecté dans 3 ADCs
-	duration=10*60
-
-	data=Client(host='10.0.0.15',port=18001,user='mbesdeberc@unistra.fr')	#ouvre un client Arclink
-		
-	res=data.get_waveforms('XX','GP000','00','CH?',t1,t1+duration,route=False)
+	t1=UTCDateTime("2016-02-15T15:53:00")
+	t2=t1+10*60
+	data=Client(host='10.0.0.15',port=18001,user='mbesdeberc@unistra.fr')	
+	res=data.get_waveforms('XX','GP000','00','CH?',t1,t2,route=False)
 	res.sort()
-	res.write('res.mseed',format='MSEED')
 	for tr in res:
 		tr.data=tr.data*2.384e-6	
-
-	(NE,NN,NZ,f)=sleeman(res,nfft=4096)
+	(NE,NN,NZ,f)=sleeman(res,nfft=1024)
 	pyplot.semilogx(f,10*np.log10(NE))
 	pyplot.semilogx(f,10*np.log10(NN))
 	pyplot.semilogx(f,10*np.log10(NZ))
-	
-	pyplot.title(res[0].stats.network+'.'+res[0].stats.station+'.'+res[0].stats.location)
+	pyplot.title(res[0].stats.network+'.'+res[0].stats.station+'.'+res[0].stats.location+' self-noise')
 	pyplot.grid()
 	pyplot.xlabel("Frequency (Hz)")
 	pyplot.ylabel("Electronic Noise (dB rel to 1 V**2/Hz)")
-	pyplot.legend()
 	pyplot.show()
-
-
-
-	
 
