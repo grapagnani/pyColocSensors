@@ -1,0 +1,103 @@
+#!/usr/bin/python
+# -*- coding: iso-8859-15 -*-
+"""
+/*
+ * ----------------------------------------------------------------------------
+ * "THE BEER-WARE LICENSE" (Revision 42):
+ * <mbesdeberc@unistra.fr> wrote this file. As long as you retain this notice 
+ * you can do whatever you want with this stuff. If we meet some day, and you 
+ * think this stuff is worth it, you can buy me a beer in return. 
+ * M. Bes de Berc
+ * ----------------------------------------------------------------------------
+ */
+ Usage: 
+    comp_psd arclink <start> <end> <stream> [-S <server>] [-P <port>] \
+[--vel-gain=<vgain>] [--lsb=<lsb>] [--period=<per>] [--damping=<damp>]
+
+Example:
+    ./comp_psd arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
+XX.GPIL.10.HH? -S renass-fw -P 18001
+
+Options:
+    -h --help           Show this screen.
+    --version           Show version.
+    <start>             Start time in obspy.core.UTCDateTime format.
+    <end>               End time in obspy.core.UTCDateTime format.
+    <stream>            Stream to analyse in seed code separated by dots. \
+(Ex: XX.GPIL.00.HH?).
+    -S <server>         Set address of arclink server [default: renass-fw].
+    -P <port>           Set port of arclink server [default: 18115]. 
+    --vel-gain=<vgain>  Set velocimeter gain [default: 1500].
+    --lsb=<lsb>         Specify digitizer lsb [default: 2.384e-6].
+    --period=<per>      Specify expected period [default: 120].
+    --damping=<damp>    Specify expected daming [default: 0.707].
+"""
+
+from docopt import docopt
+from obspy.clients.arclink import Client
+from obspy.core import UTCDateTime
+from obspy.signal.invsim import corn_freq_2_paz,cosine_taper
+from obspy.signal.util import prev_pow_2
+from obspy.signal.spectral_estimation import get_nlnm,get_nhnm
+from scipy.signal import zpk2tf,freqs
+from matplotlib import mlab,pyplot
+import numpy as np
+
+def detrend_func(data):
+    data=mlab.detrend_mean(data)
+    data=mlab.detrend_linear(data)
+    return data    
+
+def calc_n_plot(tr,paz):
+    (b,a)=zpk2tf(paz['zeros'],paz['poles'],paz['gain'])
+            
+    n_fft=prev_pow_2(int(tr.stats.npts*1./13))
+    n_overlap=int(n_fft*0.75)
+
+    (P,f)=mlab.psd(tr.data,Fs=tr.stats.sampling_rate,NFFT=n_fft,\
+noverlap=n_overlap,sides='onesided',detrend=detrend_func,\
+window=cosine_taper(n_fft),scale_by_freq=True)
+
+    P=P*1.142857/(paz['sensitivity']**2)
+
+    (w,H0)=freqs(b,a,f*2*np.pi)
+
+    P=P*w**2/np.absolute(H0*np.conjugate(H0))
+
+    pyplot.semilogx(1./f,10*np.log10(P),label=tr.id)    
+
+if __name__ == '__main__':
+    args=docopt(__doc__, version='repimp_analyser 1.1')
+    #Uncomment for debug
+    #print(args)
+
+    if args['arclink']:
+        data=Client(host=args['-S'],port=args['-P'],\
+        user='mbesdeberc@unistra.fr')
+        t1=UTCDateTime(args['<start>'])
+        t2=UTCDateTime(args['<end>'])
+        code=args['<stream>'].split('.')
+        st=data.get_waveforms(code[0],code[1],code[2],code[3],t1,t2,route=False)
+        
+    print(st)
+    st.plot()
+    for tr_mes in st:
+        pyplot.figure()
+        tr_ref=data.get_waveforms('FR','STR','00',tr_mes.stats.channel,t1,t2,route=False)[0]
+        paz_ref=data.get_paz('FR','STR','00',tr_mes.stats.channel,t1,route=False)
+        paz_mes=corn_freq_2_paz(1./int(args['--period']),damp=float(args['--damping']))
+        paz_mes['sensitivity']=float(args['--vel-gain'])/float(args['--lsb'])
+        
+        calc_n_plot(tr_mes,paz_mes)
+        calc_n_plot(tr_ref,paz_ref)       
+
+        (p,P)=get_nlnm()
+        pyplot.semilogx(p,P,'k')
+        (p,P)=get_nhnm()
+        pyplot.semilogx(p,P,'k')
+        pyplot.grid()
+        pyplot.title(tr_mes.id)
+        pyplot.xlim((0.05,100)) 
+        pyplot.legend(loc='best')       
+        
+pyplot.show()
