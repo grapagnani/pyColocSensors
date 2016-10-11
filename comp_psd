@@ -57,7 +57,7 @@ def calc_n_plot(tr,paz):
 
     (P,f)=mlab.psd(tr.data,Fs=tr.stats.sampling_rate,NFFT=n_fft,\
 noverlap=n_overlap,sides='onesided',detrend=detrend_func,\
-window=cosine_taper(n_fft),scale_by_freq=True)
+window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
 
     P=P*1.142857/(paz['sensitivity']**2)
 
