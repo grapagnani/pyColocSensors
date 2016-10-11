@@ -87,11 +87,11 @@ if __name__ == '__main__':
     st.plot()
     for tr_mes in st:
         try:
-            paz_mes=data.get_paz(code[0],code[1],code[2],tr_mes.stats.channel,t1,route=False)
+            paz_mes=data.get_paz(tr_mes.stats.network,tr_mes.stats.station,\
+            tr_mes.stats.location,tr_mes.stats.channel,t1,route=False)
         except:
             paz_mes=corn_freq_2_paz(1./int(args['--period']),damp=float(args['--damping']))
             paz_mes['sensitivity']=float(args['--vel-gain'])/float(args['--lsb'])
-        
         calc_n_plot(tr_mes,paz_mes)
 
         (p,P)=get_nlnm()
