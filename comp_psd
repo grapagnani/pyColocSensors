@@ -98,9 +98,11 @@ if __name__ == '__main__':
         pyplot.semilogx(p,P,'k')
         (p,P)=get_nhnm()
         pyplot.semilogx(p,P,'k')
-        pyplot.grid()
-        pyplot.title(tr_mes.id)
+        pyplot.grid(b=True,which='both')
+        pyplot.title("Comparative PSDs")
         pyplot.xlim((0.01,100))
+        pyplot.xlabel("Period (s)")
+        pyplot.ylabel("PSD (dB rel to m*s**-2*Hz**-2)")
         pyplot.legend(loc='best')       
         
 pyplot.show()
