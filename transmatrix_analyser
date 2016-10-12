@@ -71,4 +71,4 @@ if __name__ == '__main__':
     print("Orientation error: "+str(alpha*180/np.pi)+" degrees")
     print(st[0].id+ " gain: "+str(t_mat[0][0]/np.cos(alpha)))
     print(st[1].id+ " gain: "+str(t_mat[1][1]/np.cos(alpha)))
-    print(st[2].id+ " gain: "+str(t_mat[2][2]/np.cos(alpha)))
+    print(st[2].id+ " gain: "+str(t_mat[2][2]))
