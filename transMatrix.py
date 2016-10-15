@@ -7,16 +7,12 @@ import numpy as np
     
 def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
 
+    for stream in (mon_stream,res_stream):
     #Selection des traces
-    mon_stream.detrend('demean')
-    mon_stream.detrend('linear')
-    mon_stream.taper(0.05)
-    mon_stream.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True, corners=2)
-
-    res_stream.detrend('demean')
-    res_stream.detrend('linear')
-    res_stream.taper(0.05)
-    res_stream.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True, corners=2)
+        stream.detrend('demean')
+        stream.detrend('linear')
+        stream.taper(0.1)
+        stream.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True, corners=8)
 
     coeff_matrix=np.matrix([mon_stream[0].data,mon_stream[1].data,mon_stream[2].data]).transpose()
 
