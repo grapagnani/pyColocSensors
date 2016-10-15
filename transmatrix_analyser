@@ -65,7 +65,7 @@ if __name__ == '__main__':
         except:
             pass
     
-    t_mat=transMatrix(st,st_ref)
+    t_mat=transMatrix(st,st_ref,fmin=float(args['--fmin']),fmax=float(args['--fmax']))
     print(t_mat)
     alpha=np.arctan(t_mat[1][0]/t_mat[0][0])
     print("Orientation error: "+str(alpha*180/np.pi)+" degrees")
