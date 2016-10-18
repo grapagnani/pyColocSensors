@@ -10,7 +10,7 @@
  * M. Bes de Berc
  * ----------------------------------------------------------------------------
  */
- Usage: 
+ Usage:
     comp_psd arclink <start> <end> <stream> [-S <server>] [-P <port>] \
 [--vel-gain=<vgain>] [--lsb=<lsb>] [--period=<per>] [--damping=<damp>]
 
@@ -47,11 +47,11 @@ import numpy as np
 def detrend_func(data):
     data=mlab.detrend_mean(data)
     data=mlab.detrend_linear(data)
-    return data    
+    return data
 
 def calc_n_plot(tr,paz):
     (b,a)=zpk2tf(paz['zeros'],paz['poles'],paz['gain'])
-            
+
     n_fft=prev_pow_2(int(tr.stats.npts*1./13))
     n_overlap=int(n_fft*0.75)
 
@@ -63,9 +63,12 @@ window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
 
     (w,H0)=freqs(b,a,f*2*np.pi)
 
-    P=P*w**2/np.absolute(H0*np.conjugate(H0))
+    if paz['sensitivity_unit']=='M/S**2':
+	P=P/np.absolute(H0*np.conjugate(H0))
+    elif paz['sensitivity_unit']=='M/S':
+	P=P*w**2/np.absolute(H0*np.conjugate(H0))
 
-    pyplot.semilogx(1./f,10*np.log10(P),label=tr.id)    
+    pyplot.semilogx(1./f,10*np.log10(P),label=tr.id)
 
 if __name__ == '__main__':
     args=docopt(__doc__, version='repimp_analyser 1.1')
@@ -82,9 +85,9 @@ if __name__ == '__main__':
         for stream in streams:
             code=stream.split('.')
             st+=data.get_waveforms(code[0],code[1],code[2],code[3],t1,t2,route=False)
-        
+
     print(st)
-    st.plot()
+    st.plot(equal_scale=False)
     for tr_mes in st:
         try:
             paz_mes=data.get_paz(tr_mes.stats.network,tr_mes.stats.station,\
@@ -103,6 +106,6 @@ if __name__ == '__main__':
         pyplot.xlim((0.01,100))
         pyplot.xlabel("Period (s)")
         pyplot.ylabel("PSD (dB rel to m*s**-2*Hz**-2)")
-        pyplot.legend(loc='best')       
-        
+        pyplot.legend(loc='best')
+
 pyplot.show()
