@@ -12,7 +12,10 @@
  */
  Usage:
     comp_psd arclink <start> <end> <stream> [-S <server>] [-P <port>] \
-[--vel-gain=<vgain>] [--lsb=<lsb>] [--period=<per>] [--damping=<damp>]
+[--vel-gain=<vgain>] [--lsb=<lsb>] [--period=<per>] [--damping=<damp>] \
+[--unit=<unit>]
+    comp_psd mseed <file> [--sensitivity=<sens>] [--period=<per>] \
+[--damping=<damp>] [--unit=<unit>]
 
 Example:
     ./comp_psd arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
@@ -21,22 +24,31 @@ XX.GPIL.10.HH? -S renass-fw -P 18001
 Options:
     -h --help           Show this screen.
     --version           Show version.
-    <start>             Start time in obspy.core.UTCDateTime format.
-    <end>               End time in obspy.core.UTCDateTime format.
+    <start>             Start time in obspy.core.UTCDateTime format. \
+Arclink mode only.
+    <end>               End time in obspy.core.UTCDateTime format. \
+Arclink mode only.
     <stream>            Stream to analyse in seed code separated by dots. \
 Multiple streams are allowed, separated by comma \
-(Ex: XX.GPIL.00.HH?,FR.STR.00.HH?).
-    -S <server>         Set address of arclink server [default: renass-fw].
-    -P <port>           Set port of arclink server [default: 18001].
-    --vel-gain=<vgain>  Set velocimeter gain [default: 1500].
-    --lsb=<lsb>         Specify digitizer lsb [default: 2.384e-6].
+(Ex: XX.GPIL.00.HH?,FR.STR.00.HH?). Arclink mode only.
+    -S <server>         Set address of arclink server, arclink mode only. \
+[default: renass-fw].
+    -P <port>           Set port of arclink server, arclink mode only. \
+[default: 18001].
+    --vel-gain=<vgain>  Set velocimeter gain, arclink mode only. \
+[default: 1500].
+    --lsb=<lsb>         Specify digitizer lsb, arclink mode only. \
+[default: 2.384e-6].
+    --sensitivity=<sens>   Specify overall sensitivity, mseed mode only. \
+[default: 6.29145e8]. 
     --period=<per>      Specify expected period [default: 120].
-    --damping=<damp>    Specify expected daming [default: 0.707].
+    --damping=<damp>    Specify expected damping [default: 0.707].
+    --unit=<unit>       Specify output unit [default: M/S].
 """
 
 from docopt import docopt
 from obspy.clients.arclink import Client
-from obspy.core import UTCDateTime,Stream
+from obspy.core import UTCDateTime,Stream,read
 from obspy.signal.invsim import corn_freq_2_paz,cosine_taper
 from obspy.signal.util import prev_pow_2
 from obspy.signal.spectral_estimation import get_nlnm,get_nhnm
@@ -71,7 +83,7 @@ window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
     pyplot.semilogx(1./f,10*np.log10(P),label=tr.id)
 
 if __name__ == '__main__':
-    args=docopt(__doc__, version='repimp_analyser 1.1')
+    args=docopt(__doc__, version='comp_psd 1.0')
     #Uncomment for debug
     #print(args)
 
@@ -86,6 +98,9 @@ if __name__ == '__main__':
             code=stream.split('.')
             st+=data.get_waveforms(code[0],code[1],code[2],code[3],t1,t2,route=False)
 
+    elif args['mseed']:
+        st=read(args['<file>'])
+
     print(st)
     st.plot(equal_scale=False)
     for tr_mes in st:
@@ -95,6 +110,8 @@ if __name__ == '__main__':
         except:
             paz_mes=corn_freq_2_paz(1./int(args['--period']),damp=float(args['--damping']))
             paz_mes['sensitivity']=float(args['--vel-gain'])/float(args['--lsb'])
+            paz_mes['sensitivity_unit']=args['--unit']
+
         calc_n_plot(tr_mes,paz_mes)
 
         (p,P)=get_nlnm()
