@@ -28,8 +28,8 @@ Options:
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115]. 
     --ref-stream <ref-stream>   Set reference stream [default: FR.STR.00.HH?].
-    --fmin=<fmin>       Set minimum frequency for bandpass filter [default: 0.1].
-    --fmax=<fmax>       Set maximum frequency for bandpass filter [default: 10].
+    --fmin=<fmin>       Set minimum frequency for bandpass filter [default: 0.125].
+    --fmax=<fmax>       Set maximum frequency for bandpass filter [default: 0.5].
 """
 
 from docopt import docopt
