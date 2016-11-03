@@ -66,9 +66,16 @@ if __name__ == '__main__':
             pass
     
     t_mat=transMatrix(st,st_ref,fmin=float(args['--fmin']),fmax=float(args['--fmax']))
+    print("Rotation matrix between streams:")
     print(t_mat)
-    alpha=np.arctan2(t_mat[1][0],t_mat[0][0])
-    print("Orientation error: "+str(alpha*180/np.pi)+" degrees")
-    print(st[0].id+ " gain: "+str(t_mat[0][0]/np.cos(alpha)))
-    print(st[1].id+ " gain: "+str(t_mat[1][1]/np.cos(alpha)))
-    print(st[2].id+ " gain: "+str(t_mat[2][2]))
+    if args['--ref-stream'] == args['<stream>']:
+        print("Orthogonality/diaphony error in dB:")
+        print(20*np.log10(np.absolute(t_mat)))
+        print("Orthogonality/diaphony error in degrees:")
+        print(np.arcsin(t_mat*180/np.pi))
+    else:
+        alpha=np.arctan2(t_mat[1][0],t_mat[0][0])
+        print("Orientation error: "+str(alpha*180/np.pi)+" degrees")
+        print(st[0].id+ " gain: "+str(t_mat[0][0]/np.cos(alpha)))
+        print(st[1].id+ " gain: "+str(t_mat[1][1]/np.cos(alpha)))
+        print(st[2].id+ " gain: "+str(t_mat[2][2]))
