@@ -13,8 +13,15 @@ plotting: Booléen activant le plot de la fonction de transfert calculée
 
 Executé directement, le fichier propose un exemple de calcul de fonction de transfert d'un T120, par un signal de bruit blanc généré par un Q330
 
-Maxime Bès de Berc
-12/11/2013
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
 """
 
 from obspy.core import UTCDateTime,Stream

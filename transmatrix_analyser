@@ -1,15 +1,16 @@
 #!/usr/bin/python
-# -*- coding: iso-8859-15 -*-
+# -*- coding: utf-8 -*-
 """
-/*
- * ----------------------------------------------------------------------------
- * "THE BEER-WARE LICENSE" (Revision 42):
- * <mbesdeberc@unistra.fr> wrote this file. As long as you retain this notice 
- * you can do whatever you want with this stuff. If we meet some day, and you 
- * think this stuff is worth it, you can buy me a beer in return. 
- * M. Bes de Berc
- * ----------------------------------------------------------------------------
- */
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+
  Usage: 
     transmatrix_analyser arclink <start> <end> <stream> [-S <server>] [-P <port>] \
 [--ref-stream <ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]

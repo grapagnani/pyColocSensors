@@ -1,6 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
 
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+"""
 from obspy.core import UTCDateTime
 from obspy.clients.arclink import Client
 import numpy as np
