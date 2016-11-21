@@ -1,6 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+"""
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
 
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+"""
 import numpy as np
 import scipy as sp
 
