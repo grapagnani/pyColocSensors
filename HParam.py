@@ -55,7 +55,6 @@ def HParam(H, C, f, **kwargs):
 	Pm=modelPhase(f, popt[0], popt[1], popt[2])
 	
 	if 'plotting' in kwargs and kwargs['plotting']:
-		fig=plt.figure()	
 		plt.subplot(311)
 		plt.semilogx(f, 20*np.log10(Ar), 'r-', label='measurement')
 		plt.semilogx(f, 20*np.log10(Am), 'g-', label='best fit')
