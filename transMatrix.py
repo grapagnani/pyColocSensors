@@ -11,8 +11,6 @@
     The Beerware License
     (https://tldrlegal.com/license/beerware-license)
 """
-from obspy.core import UTCDateTime
-from obspy.clients.arclink import Client
 import numpy as np
     
 def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):

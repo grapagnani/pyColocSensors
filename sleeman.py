@@ -11,11 +11,8 @@
     The Beerware License
     (https://tldrlegal.com/license/beerware-license)
 """
-from obspy.core import UTCDateTime
-from obspy.clients.arclink import Client
 import numpy as np
 from matplotlib import mlab
-from matplotlib import pyplot
 
 def sleeman(stream, **kwargs):
 

@@ -24,14 +24,9 @@ Executé directement, le fichier propose un exemple de calcul de fonction de tra
     (https://tldrlegal.com/license/beerware-license)
 """
 
-from obspy.core import UTCDateTime,Stream
-from obspy.clients.arclink import Client
-from HParam import HParam
 from matplotlib import mlab
 import numpy as np
 import scipy.signal as sp
-import shutil as sh
-
 
 def crossCalib(monitor_trace, response_trace, **kwargs):
 	
