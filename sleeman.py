@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
+    Function calculating electronic noise of 3 traces recording strictly the \
+    same signal. This function uses sleeman's method (doi: 10.1785/0120050032).
+
 :author:
     Maxime Bès de Berc (mbesdeberc@unistra.fr)
 
@@ -13,41 +16,74 @@
 """
 import numpy as np
 from matplotlib import mlab
+from obspy.signal.util import prev_pow_2
+from obspy.signal.invsim import cosine_taper
 
-def sleeman(stream, **kwargs):
+def detrend_func(data):
+    data=mlab.detrend_mean(data)
+    data=mlab.detrend_linear(data)
+    return data
 
-	m=stream.copy()
+def sleeman(stream):
+    """
+    CTEW1 constructor. Open network socket.
+    :type stream: Stream object from module obspy.core.stream
+    :param stream: Stream containing 3 traces with the same signal recorded.
+    """
 
-	if 'nfft' in kwargs:
-		n_fft=kwargs['nfft']
-	else:
-		n_fft=1024
+    #Copy original stream
+    m=stream.copy()
 
-	if 'npad' in kwargs:
-		n_pad=kwargs['npad']
-	else:
-		n_pad=n_fft*4
+    #Verify stream
+    if m[0].stats.sampling_rate != m[1].stats.sampling_rate \
+    or m[0].stats.sampling_rate != m[2].stats.sampling_rate \
+    or m[1].stats.sampling_rate != m[2].stats.sampling_rate:
+        print("[pyColocSensors.sleeman]: Sampling rates are not identical \
+        between traces")
 
-	if 'noverlap' in kwargs:
-		n_overlap=kwargs['noverlap']
-	else:
-		n_overlap=int(n_fft*0.90)
+    if m[0].stats.npts != m[1].stats.npts \
+    or m[0].stats.npts != m[2].stats.npts \
+    or m[1].stats.npts != m[2].stats.npts:
+        print("[pyColocSensors.sleeman]: Traces does not have the same length")
 
-	fs=m[0].stats.sampling_rate
+    #Set psd and csd parameters. Set as McNamara recommands in his paper \
+    #(doi: 10.1785/012003001)
+    n_fft=prev_pow_2(int(m[0].stats.npts*1./13))
+    n_overlap=int(n_fft*0.75)
+    fs=m[0].stats.sampling_rate
 
-	(P00,f)=mlab.psd(m[0].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	(P11,f)=mlab.psd(m[1].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	(P22,f)=mlab.psd(m[2].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	(P01,f)=mlab.csd(m[0].data,m[1].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	(P02,f)=mlab.csd(m[0].data,m[2].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	P10=np.conj(P01)
-	(P12,f)=mlab.csd(m[1].data,m[2].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,pad_to=n_pad,detrend=mlab.detrend_mean,window=mlab.window_hanning)
-	P20=np.conj(P02)
-	P21=np.conj(P12)
+    #Calculate psd and csd
+    (P00,f)=mlab.psd(m[0].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
 
-	N0=P00-P10*P02/P12
-	N1=P11-P21*P10/P20
-	N2=P22-P02*P21/P01
-	
-	return (N0,N1,N2,f)
+    (P11,f)=mlab.psd(m[1].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
+
+    (P22,f)=mlab.psd(m[2].data,Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
+
+    (P01,f)=mlab.csd(m[0].data,m[1].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
+
+    (P02,f)=mlab.csd(m[0].data,m[2].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
+
+    P10=np.conj(P01)
+
+    (P12,f)=mlab.csd(m[1].data,m[2].data, Fs=fs,NFFT=n_fft,noverlap=n_overlap,\
+    detrend=detrend_func,window=cosine_taper(n_fft,p=0.2),scale_by_freq=True)
+    P20=np.conj(P02)
+
+    P21=np.conj(P12)
+
+    #Apply corrections as McNamara recommends
+    for spectra in [P00,P11,P22,P01,P02,P10,P12,P20,P21]:
+        spectra=spectra*1.142857
+
+    #Calculate electronic noises acoording to Sleeman's method
+    N0=P00-P10*P02/P12
+    N1=P11-P21*P10/P20
+    N2=P22-P02*P21/P01
+
+    return (N0,N1,N2,f)
  
