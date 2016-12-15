@@ -42,7 +42,6 @@ from obspy.signal.spectral_estimation import get_nlnm,get_nhnm
 from pyColocSensors import sleeman
 import numpy as np
 from matplotlib import pyplot
-import pickle
 
 if __name__ == '__main__':
     args=docopt(__doc__, version='sensorNoise_analyser 1.0')
