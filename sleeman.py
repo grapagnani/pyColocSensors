@@ -51,7 +51,8 @@ def sleeman(stream):
     or m[0].stats.starttime-m[2].stats.starttime  >= m[0].stats.sampling_rate/2:\
         print("[pyColocSensors.sleeman]: Traces does not have the same start time")
 
-    #Set psd and csd parameters. Set as McNamara recommands in his paper \
+    #Set psd and csd parameters. Set as McNamara recommands in his paper, \
+    #except for windows length, staticaly fixed to 1024, to improve resolution
     #(doi: 10.1785/012003001)
     n_fft = 1024
     n_overlap = int(n_fft*0.75)
