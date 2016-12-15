@@ -16,7 +16,6 @@
 """
 import numpy as np
 from matplotlib import mlab
-from obspy.signal.util import prev_pow_2
 from obspy.signal.invsim import cosine_taper
 
 def detrend_func(data):
