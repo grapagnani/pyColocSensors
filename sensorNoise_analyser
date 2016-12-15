@@ -43,6 +43,7 @@ from obspy.signal.spectral_estimation import get_nlnm,get_nhnm
 from pyColocSensors import sleeman
 import numpy as np
 from matplotlib import pyplot
+import pickle
 
 if __name__ == '__main__':
     args=docopt(__doc__, version='sensorNoise_analyser 1.0')
@@ -68,13 +69,10 @@ if __name__ == '__main__':
                 sensitivity=inv[tr.id][0]['sensitivity']
             else:
                 sensitivity=float(args['--sensitivity'])
-            if 'sensitivity_unit' in inv[tr.id][0].keys():
-                unit=inv[tr.id][0]['sensitivity_unit']
-            else:
-                unit=args['--unit']
         except:
             sensitivity=float(args['--sensitivity'])
-            unit=args['--unit']
+
+        unit=args['--unit']
         tr.data=tr.data*1./sensitivity
 
     st.sort()
@@ -92,10 +90,18 @@ if __name__ == '__main__':
 
         (N0,N1,N2,f)=sleeman(st)
         
-        if unit == 'M/S':
+        if unit == 'M':
+            N0=N0*(2j*np.pi*f)**4
+            N1=N1*(2j*np.pi*f)**4
+            N2=N2*(2j*np.pi*f)**4
+        elif unit == 'M/S':
             N0=N0*(2j*np.pi*f)**2
             N1=N1*(2j*np.pi*f)**2
             N2=N2*(2j*np.pi*f)**2
+        elif unit == 'M/S**2':
+            pass
+        else:
+            print("[pyColocSensors.sensorNoise_analyser]: Unit unknown.")
 
         N0=np.absolute(N0)
         N1=np.absolute(N1)
@@ -114,9 +120,12 @@ if __name__ == '__main__':
 
         st.decimate(10)
 
-pyplot.legend()
 pyplot.grid()
 pyplot.xlim(2./sp,2.*10**int(args['--decades'])/sp)
 pyplot.ylim(-200,-50)
+pyplot.xlabel("Period (s)")
+pyplot.ylabel("Noise PSD (dB rel to m**2*s**-4*Hz**-2)")
+pyplot.legend(loc='best')
+pyplot.title("Instrumental Noise")
 pyplot.show()
 
