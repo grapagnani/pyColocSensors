@@ -17,8 +17,7 @@
 
 Example:
     ./sensorNoise_analyser arclink 2016-02-17T01:00:00 2016-02-17T09:00:00 \
-XX.GP000.?0.HHZ,XX.GP001.00.HHZ -S renass-fw -P 18001 --decades=4 \
---sensitivity=9487506600
+XX.GP000.?0.BHZ,XX.GP001.00.BHZ -P 18001 --sensitivity=9487506600
 
 Options:
     -h --help           Show this screen.
