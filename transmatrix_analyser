@@ -11,13 +11,13 @@
     The Beerware License
     (https://tldrlegal.com/license/beerware-license)
 
- Usage: 
-    transmatrix_analyser arclink <start> <end> <stream> [-S <server>] [-P <port>] \
-[--ref-stream <ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
+ Usage:
+    transmatrix_analyser arclink <start> <end> <stream> [-S <server>]
+    [-P <port>] [--ref-stream <ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
 
 Example:
     ./transmatrix_analyser arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
-XX.GPIL.10.HH? -S renass-fw -P 18001 --fmin=0.1 --fmax=10 
+XX.GPIL.10.HH? -S renass-fw -P 18001 --fmin=0.1 --fmax=10
 
 Options:
     -h --help           Show this screen.
@@ -27,10 +27,12 @@ Options:
     <stream>            Stream to analyse in seed code separated by dots. \
 (Ex: XX.GPIL.00.HH?).
     -S <server>         Set address of arclink server [default: renass-fw].
-    -P <port>           Set port of arclink server [default: 18115]. 
+    -P <port>           Set port of arclink server [default: 18115].
     --ref-stream <ref-stream>   Set reference stream [default: FR.STR.00.HH?].
-    --fmin=<fmin>       Set minimum frequency for bandpass filter [default: 0.125].
-    --fmax=<fmax>       Set maximum frequency for bandpass filter [default: 0.5].
+    --fmin=<fmin>       Set minimum frequency for bandpass filter \
+[default: 0.125].
+    --fmax=<fmax>       Set maximum frequency for bandpass filter \
+[default: 0.5].
 """
 
 from docopt import docopt
@@ -40,33 +42,37 @@ from pyColocSensors import transMatrix
 import numpy as np
 
 if __name__ == '__main__':
-    args=docopt(__doc__, version='repimp_analyser 1.1')
-    #Uncomment for debug
-    #print(args)
+    args = docopt(__doc__, version='repimp_analyser 1.1')
+    # Uncomment for debug
+    # print(args)
 
     if args['arclink']:
-        data=Client(host=args['-S'],port=args['-P'],\
-        user='mbesdeberc@unistra.fr')
-        t1=UTCDateTime(args['<start>'])
-        t2=UTCDateTime(args['<end>'])
-        code=args['<stream>'].split('.')
-        st=data.get_waveforms(code[0],code[1],code[2],code[3],t1,t2,route=False)
-    
+        data = Client(host=args['-S'], port=args['-P'],
+                      user='pfi@unistra.fr')
+        t1 = UTCDateTime(args['<start>'])
+        t2 = UTCDateTime(args['<end>'])
+        code = args['<stream>'].split('.')
+        st = data.get_waveforms(code[0], code[1], code[2], code[3], t1, t2,
+                                route=False)
+
     st.sort()
     print(st)
     st.plot()
-    
-    code_ref=args['--ref-stream'].split('.')
-    st_ref=data.get_waveforms(code_ref[0],code_ref[1],code_ref[2],code_ref[3],t1,t2,route=False)
+
+    code_ref = args['--ref-stream'].split('.')
+    st_ref = data.get_waveforms(code_ref[0], code_ref[1], code_ref[2],
+                                code_ref[3], t1, t2, route=False)
     st_ref.sort()
     for tr in st_ref:
         try:
-            paz_ref=data.get_paz(code_ref[0],code_ref[1],code_ref[2],tr.stats.channel,t1,route=False)
-            tr.data=tr.data*1./paz_ref['sensitivity']
+            paz_ref = data.get_paz(code_ref[0], code_ref[1], code_ref[2],
+                                   tr.stats.channel, t1, route=False)
+            tr.data = tr.data*1./paz_ref['sensitivity']
         except:
             pass
-    
-    t_mat=transMatrix(st,st_ref,fmin=float(args['--fmin']),fmax=float(args['--fmax']))
+
+    t_mat = transMatrix(st, st_ref, fmin=float(args['--fmin']),
+                        fmax=float(args['--fmax']))
     print("Rotation matrix between streams:")
     print(t_mat)
     if args['--ref-stream'] == args['<stream>']:
@@ -75,13 +81,21 @@ if __name__ == '__main__':
         print("Orthogonality/diaphony error in degrees:")
         print(np.arcsin(t_mat*180/np.pi))
     else:
-        alpha=np.arctan2(t_mat[1][0],t_mat[0][0])
-        print("    Orientation error: "+str(alpha*180/np.pi)+" degrees")
-        print("    "+st[0].id+ " gain: "+str(t_mat[0][0]/np.cos(alpha)))
-        print("    "+st[1].id+ " gain: "+str(t_mat[1][1]/np.cos(alpha)))
-        print("    "+st[2].id+ " gain: "+str(t_mat[2][2]))
-        print("    Request: ")
-        print("    "+args['<start>']+" "+args['<end>']+" "+code[0]+" "+\
-        code[1]+" "+code[3]+" "+code[2])
-        print("    "+args['<start>']+" "+args['<end>']+" "+code_ref[0]+" "+\
-        code_ref[1]+" "+code_ref[3]+" "+code_ref[2])
+        alpha = np.arctan2(t_mat[1][0], t_mat[0][0])
+        print("    Orientation error: %s degrees" % (str(alpha*180/np.pi)))
+        print("    %s gain: %s" % (st[0].id, str(t_mat[0][0]/np.cos(alpha))))
+        print("    %s gain: %s" % (st[1].id, str(t_mat[1][1]/np.cos(alpha))))
+        print("    %s gain: %s" % (st[2].id, str(t_mat[2][2]/np.cos(alpha))))
+        print("    Requests: ")
+        print("    %s %s %s.%s.%s.%s?" % (st[0].stats.starttime,
+                                          st[0].stats.endtime,
+                                          st[0].stats.network,
+                                          st[0].stats.station,
+                                          st[0].stats.location,
+                                          st[0].stats.channel[:2]))
+        print("    %s %s %s.%s.%s.%s?" % (st_ref[0].stats.starttime,
+                                          st_ref[0].stats.endtime,
+                                          st_ref[0].stats.network,
+                                          st_ref[0].stats.station,
+                                          st_ref[0].stats.location,
+                                          st_ref[0].stats.channel[:2]))
