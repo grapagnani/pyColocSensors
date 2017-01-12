@@ -55,14 +55,14 @@ if __name__ == '__main__':
         st = data.get_waveforms(code[0], code[1], code[2], code[3], t1, t2,
                                 route=False)
 
-    st.sort()
-    print(st)
-    st.plot()
-
     code_ref = args['--ref-stream'].split('.')
     st_ref = data.get_waveforms(code_ref[0], code_ref[1], code_ref[2],
                                 code_ref[3], t1, t2, route=False)
+    st.sort()
     st_ref.sort()
+    print((st + st_ref))
+    (st + st_ref).plot()
+
     for tr in st_ref:
         try:
             paz_ref = data.get_paz(code_ref[0], code_ref[1], code_ref[2],
