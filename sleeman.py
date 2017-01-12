@@ -47,8 +47,10 @@ def sleeman(stream):
         print("[pyColocSensors.sleeman]: Traces does not have the same length")
 
     if m[0].stats.starttime-m[1].stats.starttime >= m[0].stats.sampling_rate/2\
-       or m[1].stats.starttime-m[2].stats.starttime >= m[1].stats.sampling_rate/2\
-       or m[0].stats.starttime-m[2].stats.starttime >= m[0].stats.sampling_rate/2:
+       or m[1].stats.starttime-m[2].stats.starttime >= \
+       m[1].stats.sampling_rate/2\
+       or m[0].stats.starttime-m[2].stats.starttime >= \
+       m[0].stats.sampling_rate/2:
         print("[pyColocSensors.sleeman]: Traces does not have the same start\
               time")
 
