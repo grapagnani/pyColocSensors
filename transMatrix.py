@@ -56,12 +56,13 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
               between traces")
 
     if m_stream[0].stats.npts != r_stream[0].stats.npts:
-        print("[pyColocSensors.transMatrix]: Traces does not have the same length")
+        print("[pyColocSensors.transMatrix]: Traces does not have the same \
+              length")
 
     if m_stream[0].stats.starttime-r_stream[0].stats.starttime >= \
        m_stream[0].stats.sampling_rate/2:
-        print("[pyColocSensors.transMatrix]: Traces does not have the same start\
-              time")
+        print("[pyColocSensors.transMatrix]: Traces does not have the same \
+              start time")
 
     coeff_matrix = np.matrix([m_stream[0].data, m_stream[1].data,
                              m_stream[2].data]).transpose()
