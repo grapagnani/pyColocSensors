@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 """
 :author:
@@ -14,10 +14,11 @@
  Usage:
     crosscalib_analyser arclink <start> <end> <stream> [-S <server>] \
 [-P <port>] [--ref-stream=<ref-stream>] [--sensitivity=<sens>] \
-[--period=<per>] [--damping=<damp>] [--unit=<unit>] [--win-len=<wlen>]
+[--period=<per>] [--damping=<damp>] [--unit=<unit>] [--win-len=<wlen>] \
+[--smooth=<smooth>]
 
 Example:
-    ./crosscalib_analyser arclink 2017-01-01T01:00:00 2017-01-01T05:00:00 \
+    ./crosscalib_analyser arclink 2016-12-26T00:00:00 2017-01-01T00:00:00 \
 XX.GP000.00.HHZ --ref-stream=XX.GPIL.00.HHZ -S renass-fw -P 18001
 
 Options:
@@ -35,6 +36,7 @@ Options:
     --damping=<damp>    Specify expected damping [default: 0.707].
     --unit=<unit>       Specify output unit [default: M/S].
     --win-len=<wlen>    Specify slicing window length in seconds [default: 360].
+    --smooth=<smooth>   Specify smooth coefficient [default: 0].
 """
 
 from docopt import docopt
@@ -101,12 +103,18 @@ if __name__ == '__main__':
         st.decimate(10)
         st_ref.decimate(10)
 
-    freq, amp, phase = rel_calib_stack(st, st_ref, paz_ref, int(args['--win-len']), smooth=10, overlap_frac=0.75, save_data=False)
+    freq, amp, phase = rel_calib_stack(st, st_ref, paz_ref, int(args['--win-len']), smooth=int(args['--smooth']), overlap_frac=0.75, save_data=False)
 
     pyplot.subplot(211)
     pyplot.semilogx(freq, 20*np.log10(amp))
+    pyplot.grid()
+    pyplot.ylabel("Amplitude (dB rel to 1 m*s**-1)")
     pyplot.subplot(212)
-    pyplot.semilogx(freq, phase)
+    pyplot.semilogx(freq, phase*180./np.pi)
+    pyplot.grid()
+    pyplot.ylabel("Phase (deg)")
+    pyplot.xlabel("Frequency (Hz)")
+    pyplot.suptitle("%s tranfer function" % (st[0].id))
     pyplot.show()
 
 
