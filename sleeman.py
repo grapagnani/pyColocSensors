@@ -45,11 +45,13 @@ def sleeman(stream):
        or m[1].stats.sampling_rate != m[2].stats.sampling_rate:
         print("[pyColocSensors.sleeman]: Sampling rates are not identical \
         between traces")
+        raise SystemExit
 
     if m[0].stats.npts != m[1].stats.npts \
        or m[0].stats.npts != m[2].stats.npts \
        or m[1].stats.npts != m[2].stats.npts:
         print("[pyColocSensors.sleeman]: Traces does not have the same length")
+        raise SystemExit
 
     if m[0].stats.starttime-m[1].stats.starttime >= m[0].stats.sampling_rate/2\
        or m[1].stats.starttime-m[2].stats.starttime >= \
@@ -58,6 +60,7 @@ def sleeman(stream):
        m[0].stats.sampling_rate/2:
         print("[pyColocSensors.sleeman]: Traces does not have the same start\
               time")
+        raise SystemExit
 
     # Set psd and csd parameters. Set as McNamara recommands in his paper, \
     # except for windows length, staticaly fixed to 1024, to improve resolution

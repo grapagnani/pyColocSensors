@@ -76,16 +76,20 @@ if __name__ == '__main__':
 
     if len(st) != 1 or len(st_ref) != 1:
         print("[Error]: Stream does not contain one single trace")
+        raise SystemExit
 
     if st[0].stats.sampling_rate != st_ref[0].stats.sampling_rate:
         print("[Error]: Sampling rates are not identical between traces")
+        raise SystemExit
 
     if st[0].stats.npts != st_ref[0].stats.npts:
         print("[Error]: Traces does not have the same length")
+        raise SystemExit
 
     if st[0].stats.starttime-st_ref[0].stats.starttime >= \
        st_ref[0].stats.sampling_rate/2:
         print("[Error] Traces does not have the same start time")
+        raise SystemExit
 
     print((st+st_ref))
     (st+st_ref).plot(equal_scale=False)
