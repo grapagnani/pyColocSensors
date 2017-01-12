@@ -1,0 +1,150 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+
+ Usage:
+    comp_psd arclink <start> <end> <stream> [-S <server>] [-P <port>] \
+[--sensitivity=<sens>] [--period=<per>] [--damping=<damp>] \
+[--unit=<unit>]
+    comp_psd mseed <file> [--sensitivity=<sens>] [--period=<per>] \
+[--damping=<damp>] [--unit=<unit>]
+
+Example:
+    ./comp_psd arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
+XX.GPIL.10.HH? -S renass-fw -P 18001
+
+Options:
+    -h --help           Show this screen.
+    --version           Show version.
+    <start>             Start time in obspy.core.UTCDateTime format. \
+Arclink mode only.
+    <end>               End time in obspy.core.UTCDateTime format. \
+Arclink mode only.
+    <stream>            Stream to analyse in seed code separated by dots. \
+Multiple streams are allowed, separated by comma \
+(Ex: XX.GPIL.00.HH?,FR.STR.00.HH?). Arclink mode only.
+    -S <server>         Set address of arclink server, arclink mode only. \
+[default: renass-fw].
+    -P <port>           Set port of arclink server, arclink mode only. \
+[default: 18001].
+    --sensitivity=<sens>   Specify overall sensitivity [default: 6.29145e8].
+    --period=<per>      Specify expected period [default: 120].
+    --damping=<damp>    Specify expected damping [default: 0.707].
+    --unit=<unit>       Specify output unit [default: M/S].
+"""
+
+from docopt import docopt
+from obspy.clients.arclink import Client
+from obspy.core import UTCDateTime, Stream, read
+from obspy.signal.invsim import corn_freq_2_paz, cosine_taper
+from obspy.signal.util import prev_pow_2
+from obspy.signal.spectral_estimation import get_nlnm, get_nhnm
+from scipy.signal import zpk2tf, freqs
+from matplotlib import mlab, pyplot
+import numpy as np
+
+
+def detrend_func(data):
+    data = mlab.detrend_mean(data)
+    data = mlab.detrend_linear(data)
+    return data
+
+
+def calc_n_plot(tr, paz):
+    (b, a) = zpk2tf(paz['zeros'], paz['poles'], paz['gain'])
+
+    n_fft = prev_pow_2(int(tr.stats.npts*1./13))
+    n_overlap = int(n_fft*0.75)
+
+    (P, f) = mlab.psd(tr.data, Fs=tr.stats.sampling_rate, NFFT=n_fft,
+                      noverlap=n_overlap, sides='onesided',
+                      detrend=detrend_func, window=cosine_taper(n_fft, p=0.2),
+                      scale_by_freq=True)
+
+    P = P*1.142857/(paz['sensitivity']**2)
+    (w, H0) = freqs(b, a, f*2*np.pi)
+
+    P = P[1:]
+    f = f[1:]
+    H0 = H0[1:]
+    w = w[1:]
+
+    if paz['sensitivity_unit'] == 'M/S**2':
+        P = P/np.absolute(H0*np.conjugate(H0))
+    elif paz['sensitivity_unit'] == 'M/S':
+        P = P*w**2/np.absolute(H0*np.conjugate(H0))
+
+    pyplot.semilogx(1./f, 10*np.log10(P), label=tr.id)
+
+
+def make_paz(_period, _damping, _sensitivity, _unit):
+    paz = corn_freq_2_paz(1./_period, damp=_damping)
+    paz['sensitivity'] = _sensitivity
+    paz['sensitivity_unit'] = _unit
+    return paz
+
+if __name__ == '__main__':
+    args = docopt(__doc__, version='comp_psd 1.0')
+    # Uncomment for debug
+    # print(args)
+
+    if args['arclink']:
+        data = Client(host=args['-S'], port=args['-P'],
+                      user='mbesdeberc@unistra.fr')
+        t1 = UTCDateTime(args['<start>'])
+        t2 = UTCDateTime(args['<end>'])
+        streams = args['<stream>'].split(',')
+        st = Stream()
+        for stream in streams:
+            code = stream.split('.')
+            st += data.get_waveforms(code[0], code[1], code[2], code[3], t1,
+                                     t2, route=False)
+
+    elif args['mseed']:
+        st = read(args['<file>'])
+
+    print(st)
+    st.plot(equal_scale=False)
+    for tr_mes in st:
+        try:
+            paz_mes = data.get_paz(tr_mes.stats.network, tr_mes.stats.station,
+                                   tr_mes.stats.location, tr_mes.stats.channel,
+                                   t1, route=False)
+            if paz_mes['sensitivity'] == 1.0:
+                paz_mes = make_paz(int(args['--period']),
+                                   float(args['--damping']),
+                                   float(args['--sensitivity']),
+                                   args['--unit'])
+        except:
+            paz_mes = make_paz(int(args['--period']),
+                               float(args['--damping']),
+                               float(args['--sensitivity']),
+                               args['--unit'])
+
+        calc_n_plot(tr_mes, paz_mes)
+
+        (p, P) = get_nlnm()
+        pyplot.semilogx(p, P, 'k')
+        (p, P) = get_nhnm()
+        pyplot.semilogx(p, P, 'k')
+        pyplot.grid(b=True, which='both')
+        pyplot.title("Comparative PSDs")
+        pyplot.xlim((0.01, 1000))
+        pyplot.xlabel("Period (s)")
+        pyplot.ylabel("PSD (dB rel to m**2*s**-4*Hz**-2)")
+        pyplot.legend(loc='best')
+        print("    Request: %s %s %s.%s.%s.%s"
+              % (tr_mes.stats.starttime, tr_mes.stats.endtime,
+                 tr_mes.stats.network, tr_mes.stats.station,
+                 tr_mes.stats.location, tr_mes.stats.channel))
+
+pyplot.show()
