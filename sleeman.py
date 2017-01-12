@@ -20,6 +20,11 @@ from obspy.signal.invsim import cosine_taper
 
 
 def detrend_func(data):
+    """
+    Detrend function
+    :type data: numpy.array
+    :param data: Array of data to detrend
+    """
     data = mlab.detrend_mean(data)
     data = mlab.detrend_linear(data)
     return data
