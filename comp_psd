@@ -19,8 +19,8 @@
 [--damping=<damp>] [--unit=<unit>]
 
 Example:
-    ./comp_psd arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
-XX.GPIL.10.HH? -S renass-fw -P 18001
+    ./comp_psd arclink 2016-09-30T01:00:00 2016-09-30T05:00:00 \
+FR.STR.00.HHZ,FR.CHMF.00.HHZ -S renass-fw -P 18001
 
 Options:
     -h --help           Show this screen.
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
     if args['arclink']:
         data = Client(host=args['-S'], port=args['-P'],
-                      user='mbesdeberc@unistra.fr')
+                      user='pfi@unistra.fr')
         t1 = UTCDateTime(args['<start>'])
         t2 = UTCDateTime(args['<end>'])
         streams = args['<stream>'].split(',')

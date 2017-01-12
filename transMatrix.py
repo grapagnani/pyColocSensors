@@ -25,13 +25,13 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
         if m[0].stats.sampling_rate != m[1].stats.sampling_rate \
            or m[0].stats.sampling_rate != m[2].stats.sampling_rate \
            or m[1].stats.sampling_rate != m[2].stats.sampling_rate:
-            print("[pyColocSensors.sleeman]: Sampling rates are not identical \
+            print("[pyColocSensors.transMatrix]: Sampling rates are not identical \
                   between traces")
 
         if m[0].stats.npts != m[1].stats.npts \
            or m[0].stats.npts != m[2].stats.npts \
            or m[1].stats.npts != m[2].stats.npts:
-            print("[pyColocSensors.sleeman]: Traces does not have the same \
+            print("[pyColocSensors.transMatrix]: Traces does not have the same \
                   length")
 
         if m[0].stats.starttime-m[1].stats.starttime >= \
@@ -40,7 +40,7 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
            m[1].stats.sampling_rate/2\
            or m[0].stats.starttime-m[2].stats.starttime >= \
            m[0].stats.sampling_rate/2:
-            print("[pyColocSensors.sleeman]: Traces does not have the same start\
+            print("[pyColocSensors.transMatrix]: Traces does not have the same start\
                   time")
 
         # Selection des traces
@@ -52,15 +52,15 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
 
     # Verify streams between them
     if m_stream[0].stats.sampling_rate != r_stream[0].stats.sampling_rate:
-        print("[pyColocSensors.sleeman]: Sampling rates are not identical \
+        print("[pyColocSensors.transMatrix]: Sampling rates are not identical \
               between traces")
 
     if m_stream[0].stats.npts != r_stream[0].stats.npts:
-        print("[pyColocSensors.sleeman]: Traces does not have the same length")
+        print("[pyColocSensors.transMatrix]: Traces does not have the same length")
 
     if m_stream[0].stats.starttime-r_stream[0].stats.starttime >= \
        m_stream[0].stats.sampling_rate/2:
-        print("[pyColocSensors.sleeman]: Traces does not have the same start\
+        print("[pyColocSensors.transMatrix]: Traces does not have the same start\
               time")
 
     coeff_matrix = np.matrix([m_stream[0].data, m_stream[1].data,

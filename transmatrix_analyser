@@ -16,8 +16,8 @@
     [-P <port>] [--ref-stream <ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
 
 Example:
-    ./transmatrix_analyser arclink 2016-09-30T00:00:00 2016-10-01T00:00:00 \
-XX.GPIL.10.HH? -S renass-fw -P 18001 --fmin=0.1 --fmax=10
+    ./transmatrix_analyser arclink 2016-09-30T00:00:00 2016-09-30T05:00:00 \
+XX.GPIL.00.HH? -S renass-fw -P 18001 --fmin=0.1 --fmax=10
 
 Options:
     -h --help           Show this screen.
@@ -42,7 +42,7 @@ from pyColocSensors import transMatrix
 import numpy as np
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version='repimp_analyser 1.1')
+    args = docopt(__doc__, version='transmatrix_analyser 1.0')
     # Uncomment for debug
     # print(args)
 
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     st.sort()
     st_ref.sort()
     print((st + st_ref))
-    (st + st_ref).plot()
+    (st + st_ref).plot(equal_scale=False)
 
     for tr in st_ref:
         try:

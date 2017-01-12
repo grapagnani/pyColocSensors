@@ -12,7 +12,7 @@
     (https://tldrlegal.com/license/beerware-license)
 
  Usage:
-    sensorNoise_analyser arclink <start> <end> <stream> [-S <server>] \
+    ./sensornoise_analyser arclink <start> <end> <stream> [-S <server>] \
 [-P <port>] [--sensitivity=<sens>] [--unit=<unit>] [--decades=<dec>]
 
 Example:
@@ -42,7 +42,7 @@ import numpy as np
 from matplotlib import pyplot
 
 if __name__ == '__main__':
-    args = docopt(__doc__, version='sensorNoise_analyser 1.0')
+    args = docopt(__doc__, version='sensornoise_analyser 1.0')
     # Uncomment for debug
     # print(args)
 
