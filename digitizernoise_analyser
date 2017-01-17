@@ -1,0 +1,96 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+
+ Usage:
+    ./digitizernoise_analyser arclink <start> <end> <stream> [-S <server>] \
+[-P <port>] [--sensitivity=<sens>] [--decades=<dec>]
+
+Example:
+    ./digitizernoise_analyser_50R arclink 2017-01-16T15:00:00 \
+2017-01-16T16:00:00 XX.GP003.00.HH? -P 18115
+
+Options:
+    -h --help           Show this screen.
+    --version           Show version.
+    <start>             Start time in obspy.core.UTCDateTime format.
+    <end>               End time in obspy.core.UTCDateTime format.
+    <stream>            Stream to analyse in seed code separated by dots. \
+Multiple streams are allowed, separated by comma \
+(Ex: XX.GPIL.?0.HHZ,FR.STR.00.HHZ). Only 3 traces are allowed.
+    <sensitivity>       Sensitivity
+    -S <server>         Set address of arclink server [default: renass-fw].
+    -P <port>           Set port of arclink server [default: 18115].
+    --sensitivity=<sens>    Set sensitivity [default: 400000].
+    --decades=<dec>     Set number of freq decades covered [default: 3].
+"""
+from docopt import docopt
+from obspy.clients.arclink import Client
+from obspy.core import UTCDateTime, Stream
+from obspy.signal.invsim import cosine_taper
+import numpy as np
+from matplotlib import pyplot, mlab
+
+
+def detrend_func(data):
+    data = mlab.detrend_mean(data)
+    data = mlab.detrend_linear(data)
+    return data
+
+
+def calc_n_plot(tr, gain):
+    n_fft = 1024
+    n_overlap = int(n_fft*0.75)
+
+    (P, f) = mlab.psd(tr.data, Fs=tr.stats.sampling_rate, NFFT=n_fft,
+                      noverlap=n_overlap, sides='onesided',
+                      detrend=detrend_func, window=cosine_taper(n_fft, p=0.2),
+                      scale_by_freq=True)
+
+    P = P*1.142857/gain**2
+
+    P = P[1:]
+    f = f[1:]
+
+    pyplot.semilogx(1./f, 10*np.log10(P), label=tr.id)
+
+
+if __name__ == '__main__':
+    args = docopt(__doc__, version='digitizernoise_analyser_50R 1.0')
+    # Uncomment for debug
+    # print(args)
+
+    if args['arclink']:
+        data = Client(host=args['-S'], port=args['-P'],
+                      user='pfi@unistra.fr')
+        t1 = UTCDateTime(args['<start>'])
+        t2 = UTCDateTime(args['<end>'])
+        streams = args['<stream>'].split(',')
+        st = Stream()
+        for stream in streams:
+            code = stream.split('.')
+            st += data.get_waveforms(code[0], code[1], code[2], code[3], t1,
+                                     t2, route=False)
+
+    st.sort()
+    print(st)
+    st.plot(equal_scale=False)
+
+    for tr in st:
+        calc_n_plot(tr, int(args['--sensitivity']))
+
+pyplot.grid()
+pyplot.xlabel("Period (s)")
+pyplot.ylabel("Noise PSD (dB rel to 1V**2*Hz**-2)")
+pyplot.legend(loc='best')
+pyplot.title("Instrumental Noise")
+pyplot.show()

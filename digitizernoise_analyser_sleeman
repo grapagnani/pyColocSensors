@@ -1,0 +1,96 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+"""
+:author:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:copyright:
+    Maxime Bès de Berc (mbesdeberc@unistra.fr)
+
+:license:
+    The Beerware License
+    (https://tldrlegal.com/license/beerware-license)
+
+ Usage:
+    ./sensornoise_analyser arclink <start> <end> <stream> [-S <server>] \
+[-P <port>] [--sensitivity=<sens>] [--unit=<unit>] [--decades=<dec>]
+
+Example:
+    ./sensorNoise_analyser arclink 2016-02-17T01:00:00 2016-02-17T09:00:00 \
+XX.GP000.?0.BHZ,XX.GP001.00.BHZ -P 18001 --sensitivity=9487506600
+
+Options:
+    -h --help           Show this screen.
+    --version           Show version.
+    <start>             Start time in obspy.core.UTCDateTime format.
+    <end>               End time in obspy.core.UTCDateTime format.
+    <stream>            Stream to analyse in seed code separated by dots. \
+Multiple streams are allowed, separated by comma \
+(Ex: XX.GPIL.?0.HHZ,FR.STR.00.HHZ). Only 3 traces are allowed.
+    -S <server>         Set address of arclink server [default: renass-fw].
+    -P <port>           Set port of arclink server [default: 18115].
+    --sensitivity=<sens>    Set sensitivity [default: 400000].
+    --decades=<dec>     Set number of freq decades covered [default: 3].
+"""
+from docopt import docopt
+from obspy.clients.arclink import Client
+from obspy.core import UTCDateTime, Stream
+from pyColocSensors import sleeman
+import numpy as np
+from matplotlib import pyplot
+
+if __name__ == '__main__':
+    args = docopt(__doc__, version='sensornoise_analyser 1.0')
+    # Uncomment for debug
+    # print(args)
+
+    if args['arclink']:
+        data = Client(host=args['-S'], port=args['-P'],
+                      user='pfi@unistra.fr')
+        t1 = UTCDateTime(args['<start>'])
+        t2 = UTCDateTime(args['<end>'])
+        streams = args['<stream>'].split(',')
+        st = Stream()
+        for stream in streams:
+            code = stream.split('.')
+            st += data.get_waveforms(code[0], code[1], code[2], code[3], t1,
+                                     t2, route=False)
+
+    for tr in st:
+        tr.data = tr.data*1./float(args['--sensitivity'])
+
+    st.sort()
+    print(st)
+    st.plot(equal_scale=False)
+
+    sp = st[0].stats.sampling_rate
+    i = 0
+    while st[0].stats.sampling_rate >= sp/(10**(int(args['--decades'])-1)):
+
+        (N0, N1, N2, f) = sleeman(st)
+
+        N0 = np.absolute(N0)
+        N1 = np.absolute(N1)
+        N2 = np.absolute(N2)
+
+        if i == 0:
+            pyplot.semilogx(1./f, 10*np.log10(N0), 'r', label=st[0].id)
+            pyplot.semilogx(1./f, 10*np.log10(N1), 'b', label=st[1].id)
+            pyplot.semilogx(1./f, 10*np.log10(N2), 'g', label=st[2].id)
+            i += 1
+
+        else:
+            pyplot.semilogx(1./f, 10*np.log10(N0), 'r')
+            pyplot.semilogx(1./f, 10*np.log10(N1), 'b')
+            pyplot.semilogx(1./f, 10*np.log10(N2), 'g')
+
+        st.decimate(10)
+
+pyplot.grid()
+pyplot.xlim(2./sp, 2.*10**int(args['--decades'])/sp)
+pyplot.ylim(-150, -100)
+pyplot.xlabel("Period (s)")
+pyplot.ylabel("Noise PSD (dB rel to 1 V**2*Hz**-2)")
+pyplot.legend(loc='best')
+pyplot.title("Instrumental Noise")
+pyplot.show()
