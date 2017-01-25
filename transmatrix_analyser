@@ -13,7 +13,7 @@
 
  Usage:
     transmatrix_analyser arclink <start> <end> <stream> [-S <server>]
-    [-P <port>] [--ref-stream <ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
+    [-P <port>] [--ref-stream=<ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
 
 Example:
     ./transmatrix_analyser arclink 2016-09-30T00:00:00 2016-09-30T05:00:00 \
@@ -28,7 +28,7 @@ Options:
 (Ex: XX.GPIL.00.HH?).
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
-    --ref-stream <ref-stream>   Set reference stream [default: FR.STR.00.HH?].
+    --ref-stream=<ref-stream>   Set reference stream [default: FR.STR.00.HH?].
     --fmin=<fmin>       Set minimum frequency for bandpass filter \
 [default: 0.125].
     --fmax=<fmax>       Set maximum frequency for bandpass filter \
@@ -85,7 +85,7 @@ if __name__ == '__main__':
         print("    Orientation error: %s degrees" % (str(alpha*180/np.pi)))
         print("    %s gain: %s" % (st[0].id, str(t_mat[0][0]/np.cos(alpha))))
         print("    %s gain: %s" % (st[1].id, str(t_mat[1][1]/np.cos(alpha))))
-        print("    %s gain: %s" % (st[2].id, str(t_mat[2][2]/np.cos(alpha))))
+        print("    %s gain: %s" % (st[2].id, str(t_mat[2][2])))
         print("    Requests: ")
         print("    %s %s %s.%s.%s.%s?" % (st[0].stats.starttime,
                                           st[0].stats.endtime,
