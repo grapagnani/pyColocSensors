@@ -81,21 +81,12 @@ if __name__ == '__main__':
         print("Orthogonality/diaphony error in degrees:")
         print(np.arcsin(t_mat*180/np.pi))
     else:
-        alpha = np.arctan2(t_mat[1][0], t_mat[0][0])
-        print("    Orientation error: %s degrees" % (str(alpha*180/np.pi)))
-        print("    %s gain: %s" % (st[0].id, str(t_mat[0][0]/np.cos(alpha))))
-        print("    %s gain: %s" % (st[1].id, str(t_mat[1][1]/np.cos(alpha))))
-        print("    %s gain: %s" % (st[2].id, str(t_mat[2][2])))
-        print("    Requests: ")
-        print("    %s %s %s.%s.%s.%s?" % (st[0].stats.starttime,
-                                          st[0].stats.endtime,
-                                          st[0].stats.network,
-                                          st[0].stats.station,
-                                          st[0].stats.location,
-                                          st[0].stats.channel[:2]))
-        print("    %s %s %s.%s.%s.%s?" % (st_ref[0].stats.starttime,
-                                          st_ref[0].stats.endtime,
-                                          st_ref[0].stats.network,
-                                          st_ref[0].stats.station,
-                                          st_ref[0].stats.location,
-                                          st_ref[0].stats.channel[:2]))
+        alpha1 = np.arctan2(t_mat[1][0], t_mat[0][0])
+        alpha2 = np.arctan2(-1*t_mat[0][1], t_mat[1][1])
+        alpha = np.mean([alpha1, alpha2])
+        print("    Orientation error: %.2f deg, Standard deviation: %.2f deg"
+              % (alpha*180/np.pi, np.std(np.array([alpha1, alpha2])*180/np.pi))
+              )
+        print("    %s gain: %.0f" % (st[0].id, t_mat[0][0]/np.cos(alpha)))
+        print("    %s gain: %.0f" % (st[1].id, t_mat[1][1]/np.cos(alpha)))
+        print("    %s gain: %.0f" % (st[2].id, t_mat[2][2]))
