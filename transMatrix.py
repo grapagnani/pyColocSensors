@@ -60,8 +60,9 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
 
     for m in (m_stream, r_stream):
 
-	if len(m) != 3:
-            print("[pyColocSensors.transMatrix]: Stream must strictly have 3 traces")
+        if len(m) != 3:
+            print("[pyColocSensors.transMatrix]: Stream must strictly have 3 \
+traces")
             raise SystemExit
 
         # Verify each trace of stream: same sampling rate?
@@ -77,7 +78,7 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
            or m[0].stats.npts != m[2].stats.npts \
            or m[1].stats.npts != m[2].stats.npts:
             print("[pyColocSensors.transMatrix]: Traces does not have the same \
-                  length")
+length")
             raise SystemExit
 
         # Verify each trace of stream: same start time?
@@ -98,7 +99,7 @@ def transMatrix(res_stream, mon_stream, fmin=0.1, fmax=10):
         m.filter('bandpass', freqmin=fmin, freqmax=fmax, zerophase=True,
                  corners=8)
 
-    # Verify streams between them: same sammpling rate?
+    # Verify streams between them: same sampling rate?
     if m_stream[0].stats.sampling_rate != r_stream[0].stats.sampling_rate:
         print("[pyColocSensors.transMatrix]: Sampling rates are not identical \
               between traces")
