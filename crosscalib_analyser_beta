@@ -31,7 +31,7 @@ Options:
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
     --ref-stream <ref-stream>   Set reference stream [default: FR.STR.00.HHZ].
-    --sensitivity=<sens>   Specify overall sensitivity [default: 6.29145e8].
+    --sensitivity=<sens>   Specify overall sensitivity [default: 4.804e8].
     --period=<per>      Specify expected period [default: 120].
     --damping=<damp>    Specify expected damping [default: 0.707].
     --unit=<unit>       Specify output unit [default: M/S].
@@ -74,6 +74,11 @@ if __name__ == '__main__':
     st_ref = data.get_waveforms(code_ref[0], code_ref[1], code_ref[2],
                                 code_ref[3], t1, t2, route=False)
 
+    st.merge()
+    st_ref.merge()
+    print((st+st_ref))
+    (st+st_ref).plot(equal_scale=False)
+
     if len(st) != 1 or len(st_ref) != 1:
         print("[Error]: Stream does not contain one single trace")
         raise SystemExit
@@ -90,9 +95,6 @@ if __name__ == '__main__':
        st_ref[0].stats.sampling_rate/2:
         print("[Error] Traces does not have the same start time")
         raise SystemExit
-
-    print((st+st_ref))
-    (st+st_ref).plot(equal_scale=False)
 
     try:
         paz_ref = dict(data.get_paz(code_ref[0], code_ref[1], code_ref[2],
