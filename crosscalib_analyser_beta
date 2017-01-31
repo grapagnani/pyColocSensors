@@ -95,8 +95,8 @@ if __name__ == '__main__':
     (st+st_ref).plot(equal_scale=False)
 
     try:
-        paz_ref = data.get_paz(code_ref[0], code_ref[1], code_ref[2],
-                               st_ref[0].stats.channel, t1, route=False)
+        paz_ref = dict(data.get_paz(code_ref[0], code_ref[1], code_ref[2],
+                                    st_ref[0].stats.channel, t1, route=False))
     except:
         paz_ref = make_paz(int(args['--period']),
                            float(args['--damping']),
