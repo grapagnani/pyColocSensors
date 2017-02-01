@@ -61,7 +61,8 @@ if __name__ == '__main__':
         st.merge()
         st_ref.merge()
 
-    (st+st_ref).sort()
+    st.sort()
+    st_ref.sort()
     print((st + st_ref))
     (st + st_ref).plot(equal_scale=False)
 
