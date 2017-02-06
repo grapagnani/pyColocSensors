@@ -29,7 +29,7 @@ Multiple streams are allowed, separated by comma \
 (Ex: XX.GPIL.?0.HHZ,FR.STR.00.HHZ). Only 3 traces are allowed.
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
-    --sensitivity=<sens>    Set sensitivity [default: 629145000].
+    --sensitivity=<sens>    Set sensitivity [default: 4.804e8].
     --unit=<unit>       Set input unit [default: M/S].
     --decades=<dec>     Set number of freq decades covered [default: 3].
 """
