@@ -13,7 +13,8 @@
 
  Usage:
     transmatrix_analyser arclink <start> <end> <stream> [-S <server>]
-    [-P <port>] [--ref-stream=<ref-stream>] [--fmin=<fmin>] [--fmax=<fmax>]
+    [-P <port>] [-U <user>] [--ref-stream=<ref-stream>] [--fmin=<fmin>]
+    [--fmax=<fmax>]
 
 Example:
     ./transmatrix_analyser arclink 2016-09-30T00:00:00 2016-09-30T05:00:00 \
@@ -28,6 +29,8 @@ Options:
 (Ex: XX.GPIL.00.HH?).
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
+    -U <user>           Set user for connecting to arclink server \
+[default: pfi@unistra.fr].
     --ref-stream=<ref-stream>   Set reference stream [default: FR.STR.00.HH?].
     --fmin=<fmin>       Set minimum frequency for bandpass filter \
 [default: 0.125].
@@ -48,7 +51,7 @@ if __name__ == '__main__':
 
     if args['arclink']:
         data = Client(host=args['-S'], port=args['-P'],
-                      user='pfi@unistra.fr')
+                      user=args['-U'])
         t1 = UTCDateTime(args['<start>'])
         t2 = UTCDateTime(args['<end>'])
         code = args['<stream>'].split('.')

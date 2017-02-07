@@ -13,7 +13,8 @@
 
  Usage:
     ./sensornoise_analyser arclink <start> <end> <stream> [-S <server>] \
-[-P <port>] [--sensitivity=<sens>] [--unit=<unit>] [--decades=<dec>]
+[-P <port>] [-U <user>] [--sensitivity=<sens>] [--unit=<unit>] \
+[--decades=<dec>]
 
 Example:
     ./sensorNoise_analyser arclink 2016-02-17T01:00:00 2016-02-17T09:00:00 \
@@ -29,6 +30,8 @@ Multiple streams are allowed, separated by comma \
 (Ex: XX.GPIL.?0.HHZ,FR.STR.00.HHZ). Only 3 traces are allowed.
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
+    -U <user>           Set user for connecting to arclink server \
+[default: pfi@unistra.fr].
     --sensitivity=<sens>    Set sensitivity [default: 400000].
     --decades=<dec>     Set number of freq decades covered [default: 3].
 """
@@ -46,7 +49,7 @@ if __name__ == '__main__':
 
     if args['arclink']:
         data = Client(host=args['-S'], port=args['-P'],
-                      user='pfi@unistra.fr')
+                      user=args['-U'])
         t1 = UTCDateTime(args['<start>'])
         t2 = UTCDateTime(args['<end>'])
         streams = args['<stream>'].split(',')

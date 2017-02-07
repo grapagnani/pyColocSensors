@@ -13,7 +13,7 @@
 
  Usage:
     crosscalib_analyser arclink <start> <end> <stream> [-S <server>] \
-[-P <port>] [--ref-stream=<ref-stream>] [--sensitivity=<sens>] \
+[-P <port>] [-U <user>] [--ref-stream=<ref-stream>] [--sensitivity=<sens>] \
 [--period=<per>] [--damping=<damp>] [--unit=<unit>] [--win-len=<wlen>] \
 [--smooth=<smooth>]
 
@@ -30,6 +30,8 @@ Options:
 (Ex: XX.GPIL.00.HHZ).
     -S <server>         Set address of arclink server [default: renass-fw].
     -P <port>           Set port of arclink server [default: 18115].
+    -U <user>           Set user for connecting to arclink server \
+[default: pfi@unistra.fr].
     --ref-stream <ref-stream>   Set reference stream [default: FR.STR.00.HHZ].
     --sensitivity=<sens>   Specify overall sensitivity [default: 4.804e8].
     --period=<per>      Specify expected period [default: 120].
@@ -63,7 +65,7 @@ if __name__ == '__main__':
 
     if args['arclink']:
         data = Client(host=args['-S'], port=args['-P'],
-                      user='pfi@unistra.fr')
+                      user=args['-U'])
         t1 = UTCDateTime(args['<start>'])
         t2 = UTCDateTime(args['<end>'])
         code = args['<stream>'].split('.')
